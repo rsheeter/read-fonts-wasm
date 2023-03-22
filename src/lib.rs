@@ -12,6 +12,6 @@ pub fn greet(name: &str) {
 }
 
 #[wasm_bindgen]
-pub fn read_glyph(font: &ArrayBuffer) {
-    alert(&format!("A font with {} bytes!", font.byte_length()));
+pub fn read_glyph(font: &ArrayBuffer) -> String {
+    return format!("A font with {} bytes!", font.byte_length());
 }
