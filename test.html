@@ -6,7 +6,9 @@
   </head>
   <body>
     <script type="module">
-      let font_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2";
+      // Don't have woff2_decompress in Rust at time of writing and as far as I can tell the browser
+      // doesn't expose it to js
+      let font_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf";
       import init, { greet, read_glyph } from "./pkg/read_fonts_wasm.js";      
       // Everyone returns promises so we end up with a lot of then's
       init().then(() => fetch(font_url))      
