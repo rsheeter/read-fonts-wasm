@@ -14,10 +14,7 @@ pub fn greet(name: &str) {
 
 #[wasm_bindgen]
 pub fn read_glyph(buf: &ArrayBuffer) -> String {
-    let u8_buf = Uint8Array::new(&buf);
-    let mut rust_buf: Vec<u8> = vec![0; u8_buf.byte_length() as usize];
-    u8_buf.copy_to(rust_buf.as_mut_slice());
-
+    let rust_buf = Uint8Array::new(&buf).to_vec();
     let font = match FontRef::new(&rust_buf) {
         Ok(font) => font,
         Err(e) => return format!("FontRef::new failed: {e}"),
