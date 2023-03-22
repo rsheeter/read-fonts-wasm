@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>hello-wasm example</title>
+  </head>
+  <body>
+    <script type="module">
+      import init, { greet, read_glyph } from "./pkg/read_fonts_wasm.js";
+      init().then(() => {
+        greet("WebAssembly");
+      });
+
+
+      fetch("https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2")
+        .then((response) => response.arrayBuffer())
+        .then((buf) => {
+            console.log("font has " + buf.byteLength + " bytes");
+            read_glyph(buf);
+        });
+    </script>
+  </body>
+</html>
