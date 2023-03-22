@@ -50,11 +50,21 @@ impl SvgPen {
     fn to_string(mut self) -> String {
         let min_x = self.min_x.unwrap_or_default();
         let min_y = self.min_y.unwrap_or_default();
+        let max_y = self.max_y.unwrap_or_default();
         let width = self.max_x.unwrap_or_default() - min_x;
-        let height = self.max_y.unwrap_or_default() - min_y;
+        let height = max_y - min_y;
+
+        // To flip over y at the middle of the shape we would translate down so the middle
+        // is at 0, flip y, then translate back up again. The translates add up so we end up
+        // shifting by twice the midpoint.
+        let shift = min_y + max_y;
+
         self.fragments.insert(0, format!(r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{min_x} {min_y} {width} {height}">"#));
-        self.fragments.insert(1, r#"<path d=""#.to_string());
+        self.fragments
+            .insert(1, format!(r#"<g transform="matrix(1 0 0 -1 0 {shift})">"#));
+        self.fragments.insert(2, r#"<path d=""#.to_string());
         self.fragments.push(r#""/>"#.to_string());
+        self.fragments.push("</g>".to_string());
         self.fragments.push("</svg>".to_string());
         self.fragments.join(" ")
     }
@@ -93,19 +103,18 @@ impl Pen for SvgPen {
 }
 
 #[wasm_bindgen]
-pub fn svg_of_glyph(buf: &ArrayBuffer) -> String {
+pub fn svg_of_glyph(gid: u16, buf: &ArrayBuffer) -> String {
     let rust_buf = Uint8Array::new(&buf).to_vec();
     let font = match FontRef::new(&rust_buf) {
         Ok(font) => font,
         Err(e) => return format!("FontRef::new failed: {e}"),
     };
 
-    let alarm_gid = 811; // per hb-shape
     let mut cx = Context::new();
     let mut scalar = cx.new_scaler().size(Size::new(18.0)).build(&font);
     let mut pen = SvgPen::default();
 
-    match scalar.outline(GlyphId::new(alarm_gid), &mut pen) {
+    match scalar.outline(GlyphId::new(gid), &mut pen) {
         Ok(()) => pen.to_string(),
         Err(e) => format!("outline failed: {e}"),
     }

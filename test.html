@@ -17,7 +17,10 @@
       init().then(() => fetch(font_url))      
         .then((response) => response.arrayBuffer())
         .then((buf) => {
-            let svg_string = svg_of_glyph(buf);
+            // 811: alarm per hb-shape
+            // 908: settings per hb-shape
+            // 850: favorite per hb-shape
+            let svg_string = svg_of_glyph(811, buf);
             const svgNode = document.createRange().createContextualFragment(svg_string);
             document.body.appendChild(svgNode);
         });
