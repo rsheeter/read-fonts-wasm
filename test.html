@@ -3,19 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <title>hello-wasm example</title>
+    <style>
+        svg { width: 45%; }
+    </style>
   </head>
   <body>
     <script type="module">
       // Don't have woff2_decompress in Rust at time of writing and as far as I can tell the browser
       // doesn't expose it to js
       let font_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf";
-      import init, { greet, read_glyph } from "./pkg/read_fonts_wasm.js";      
+      import init, { svg_of_glyph } from "./pkg/read_fonts_wasm.js";      
       // Everyone returns promises so we end up with a lot of then's
       init().then(() => fetch(font_url))      
         .then((response) => response.arrayBuffer())
         .then((buf) => {
-            console.log("font has " + buf.byteLength + " bytes");
-            console.log(read_glyph(buf));
+            let svg_string = svg_of_glyph(buf);
+            const svgNode = document.createRange().createContextualFragment(svg_string);
+            document.body.appendChild(svgNode);
         });
     </script>
   </body>
