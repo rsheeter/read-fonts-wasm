@@ -1,7 +1,7 @@
 use js_sys::{ArrayBuffer, Uint8Array};
 
 use skrifa::{
-    raw::FontRef,
+    raw::{FontRef, TableProvider},
     scale::{Context, Pen},
     GlyphId, Size,
 };
@@ -103,7 +103,7 @@ impl Pen for SvgPen {
 }
 
 #[wasm_bindgen]
-pub fn svg_of_glyph(gid: u16, buf: &ArrayBuffer) -> String {
+pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &ArrayBuffer) -> String {
     let rust_buf = Uint8Array::new(&buf).to_vec();
     let font = match FontRef::new(&rust_buf) {
         Ok(font) => font,
@@ -114,7 +114,16 @@ pub fn svg_of_glyph(gid: u16, buf: &ArrayBuffer) -> String {
     let mut scalar = cx.new_scaler().size(Size::new(18.0)).build(&font);
     let mut pen = SvgPen::default();
 
-    match scalar.outline(GlyphId::new(gid), &mut pen) {
+    let cmap = match font.cmap() {
+        Ok(cmap) => cmap,
+        Err(e) => return format!("No cmap available: {e}"),
+    };
+    let gid = match cmap.map_codepoint(cp) {
+        Some(gid) => gid,
+        None => return format!("No glyph id for codepoint"),
+    };
+
+    match scalar.outline(gid, &mut pen) {
         Ok(()) => pen.to_string(),
         Err(e) => format!("outline failed: {e}"),
     }

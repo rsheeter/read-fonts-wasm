@@ -12,15 +12,13 @@
       // Don't have woff2_decompress in Rust at time of writing and as far as I can tell the browser
       // doesn't expose it to js
       let font_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf";
-      import init, { svg_of_glyph } from "./pkg/read_fonts_wasm.js";      
+      import init, { svg_of_glyph_for_codepoint } from "./pkg/read_fonts_wasm.js";      
       // Everyone returns promises so we end up with a lot of then's
       init().then(() => fetch(font_url))      
         .then((response) => response.arrayBuffer())
         .then((buf) => {
-            // 811: alarm per hb-shape
-            // 908: settings per hb-shape
-            // 850: favorite per hb-shape
-            let svg_string = svg_of_glyph(811, buf);
+            // codepoints from https://github.com/google/material-design-icons/blob/master/font/MaterialIcons-Regular.codepoints
+            let svg_string = svg_of_glyph_for_codepoint(0xe855, buf);
             const svgNode = document.createRange().createContextualFragment(svg_string);
             document.body.appendChild(svgNode);
         });
