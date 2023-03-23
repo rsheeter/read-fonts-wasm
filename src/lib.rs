@@ -3,9 +3,10 @@ use js_sys::{ArrayBuffer, Uint8Array};
 use skrifa::{
     raw::{FontRef, TableProvider},
     scale::{Context, Pen},
-    GlyphId, Size,
+    Size,
 };
 use wasm_bindgen::prelude::*;
+use woff2::decode::{convert_woff2_to_ttf, is_woff2};
 
 #[derive(Default)]
 struct SvgPen {
@@ -105,7 +106,13 @@ impl Pen for SvgPen {
 #[wasm_bindgen]
 pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &ArrayBuffer) -> String {
     let rust_buf = Uint8Array::new(&buf).to_vec();
-    let font = match FontRef::new(&rust_buf) {
+    let ttf_buffer = if is_woff2(&rust_buf) {
+        convert_woff2_to_ttf(&mut std::io::Cursor::new(rust_buf)).unwrap()
+    } else {
+        rust_buf
+    };
+
+    let font = match FontRef::new(&ttf_buffer) {
         Ok(font) => font,
         Err(e) => return format!("FontRef::new failed: {e}"),
     };
