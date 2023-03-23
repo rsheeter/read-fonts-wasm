@@ -2,26 +2,74 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <title>hello-wasm example</title>
+    <title>read-fonts-wasm example</title>
     <style>
-        svg { width: 45%; }
+      main {
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .svg-list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+      svg {
+        max-width: 100px;
+      }
     </style>
   </head>
   <body>
     <script type="module">
-      // Don't have woff2_decompress in Rust at time of writing and as far as I can tell the browser
-      // doesn't expose it to js
-      let font_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf";
-      import init, { svg_of_glyph_for_codepoint } from "./pkg/read_fonts_wasm.js";      
+      let ttf_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf";
+      let woff2_url = "https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2";
+
+      // See https://fonts.google.com/icons
+      // codepoints from https://github.com/google/material-design-icons/blob/master/font/MaterialIcons-Regular.codepoints
+      let icon_codepoints = [
+        'e8b8', // settings
+        'e87d', // favorite
+        'ea0b', // bolt
+        'ea99', // forest
+        'e1a3', // battery_charging_full
+      ]
+
+      function appendSvg(buffer, appendTo) {
+        for (const codepoint of icon_codepoints) {
+          let svg_string = svg_of_glyph_for_codepoint('0x' + codepoint, buffer);
+          const svg_node = document.createRange().createContextualFragment(svg_string);
+          document.querySelector(appendTo).appendChild(svg_node);
+        }
+      }
+
+      import init, { svg_of_glyph_for_codepoint } from './pkg/read_fonts_wasm.js';
+      await init(); // Init Wasm
+
       // Everyone returns promises so we end up with a lot of then's
-      init().then(() => fetch(font_url))      
+      fetch(ttf_url)
         .then((response) => response.arrayBuffer())
-        .then((buf) => {
-            // codepoints from https://github.com/google/material-design-icons/blob/master/font/MaterialIcons-Regular.codepoints
-            let svg_string = svg_of_glyph_for_codepoint(0xe855, buf);
-            const svgNode = document.createRange().createContextualFragment(svg_string);
-            document.body.appendChild(svgNode);
+        .then((buffer) => {
+          appendSvg(buffer, '.ttf');
+        });
+
+      fetch(woff2_url)
+        .then((response) => response.arrayBuffer())
+        .then((buffer) => {
+          appendSvg(buffer, '.woff2');
         });
     </script>
+    <main>
+      <h1><a href="https://github.com/rsheeter/read-fonts-wasm" target="_b
+        ">read-fonts-wasm</a> example</h1>
+      <section>
+        <h2>TTF to SVG</h2>
+        <div class="svg-list ttf"></div>
+      </section>
+      <section>
+        <h2>WOFF2 to SVG</h2>
+        <div class="svg-list woff2"></div>
+      </section>
+    </main>
   </body>
 </html>
