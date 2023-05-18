@@ -1,12 +1,4 @@
-use js_sys::{ArrayBuffer, Uint8Array};
-
-use skrifa::{
-    raw::{FontRef, TableProvider},
-    scale::{Context, Pen},
-    Size,
-};
-use wasm_bindgen::prelude::*;
-use woff2::decode::{convert_woff2_to_ttf, is_woff2};
+use skrifa::{prelude::*, scale::{Pen, Context}, raw::TableProvider};
 
 #[derive(Default)]
 struct SvgPen {
@@ -103,22 +95,17 @@ impl Pen for SvgPen {
     }
 }
 
-#[wasm_bindgen]
-pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &ArrayBuffer) -> String {
-    let rust_buf = Uint8Array::new(&buf).to_vec();
-    let ttf_buffer = if is_woff2(&rust_buf) {
-        convert_woff2_to_ttf(&mut std::io::Cursor::new(rust_buf)).unwrap()
-    } else {
-        rust_buf
-    };
-
-    let font = match FontRef::new(&ttf_buffer) {
+pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &[u8]) -> String {
+    let font = match FontRef::new(&buf) {
         Ok(font) => font,
         Err(e) => return format!("FontRef::new failed: {e}"),
     };
 
     let mut cx = Context::new();
-    let mut scalar = cx.new_scaler().size(Size::new(18.0)).build(&font);
+    let mut scalar = cx.new_scaler()
+        .size(Size::new(18.0))
+        .variation_settings(&[(Tag::new(b"wght"), 200.0)])
+        .build(&font);
     let mut pen = SvgPen::default();
 
     let cmap = match font.cmap() {
@@ -134,4 +121,8 @@ pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &ArrayBuffer) -> String {
         Ok(()) => pen.to_string(),
         Err(e) => format!("outline failed: {e}"),
     }
+}
+
+fn main() {
+    todo!()
 }

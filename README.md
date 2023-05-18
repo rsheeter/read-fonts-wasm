@@ -1,10 +1,16 @@
-# read-fonts-wasm
+# use-skrifa
 
-Rigged based on https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm. Sample usage:
+Do basic things with skrifa and see how big the resulting binary is.
+
+There are several profiles, see `Cargo.toml`.
 
 ```shell
-$ wasm-pack build --target web
-$ python -m http.server 8010
-
-# load http://localhost:8010/test.html
+profiles=(release release-lto release-lto-abort)
+rm -rf target/
+for profile in ${profiles[@]}; do
+    cargo build --profile "${profile}" ;
+done
+for profile in ${profiles[@]}; do
+    ls -l "target/${profile}/use_skrifa"
+done
 ```
