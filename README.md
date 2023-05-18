@@ -1,6 +1,6 @@
 # use-skrifa
 
-Do basic things with skrifa and see how big the resulting binary is.
+Do [basic things](src/main.rs) with skrifa and see how big the resulting binary is.
 
 There are several profiles, see `Cargo.toml`.
 
