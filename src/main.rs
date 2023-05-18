@@ -124,5 +124,5 @@ pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &[u8]) -> String {
 }
 
 fn main() {
-    todo!()
+    println!("{}", svg_of_glyph_for_codepoint('A' as _, &[]));
 }
