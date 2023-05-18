@@ -8,13 +8,29 @@ skrifa = "0.1.0"
 
 # Various profiles for comparison purposes
 # https://doc.rust-lang.org/cargo/reference/profiles.html#custom-profiles
+
+[profile.release-strip]
+inherits = "release"
+strip = true
+
 [profile.release-lto]
 inherits = "release"
 lto = true
 
+[profile.release-lto-strip]
+inherits = "release"
+lto = true
+strip = true
+
 [profile.release-lto-abort]
 inherits = "release"
 lto = true
+panic = 'abort'
+
+[profile.release-lto-strip-abort]
+inherits = "release"
+lto = true
+strip = true
 panic = 'abort'
 
 [[bin]]
