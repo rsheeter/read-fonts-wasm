@@ -14,3 +14,11 @@ for profile in ${profiles[@]}; do
     ls -l "target/${profile}/use_skrifa"
 done
 ```
+
+Current results:
+
+| profile | size (bytes) |
+| --- | --- |
+| release | 4263336 |
+| release-lto | 1782600 |
+| release-lto-abort | 1770016 |
