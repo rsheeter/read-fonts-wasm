@@ -3,7 +3,7 @@ use js_sys::{ArrayBuffer, Uint8Array};
 use skrifa::{
     raw::{FontRef, TableProvider},
     scale::{Context, Pen},
-    Size,
+    prelude::Size,
 };
 use wasm_bindgen::prelude::*;
 use woff2::decode::{convert_woff2_to_ttf, is_woff2};
@@ -131,7 +131,7 @@ pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &ArrayBuffer) -> String {
     };
 
     match scalar.outline(gid, &mut pen) {
-        Ok(()) => pen.to_string(),
+        Ok(..) => pen.to_string(),
         Err(e) => format!("outline failed: {e}"),
     }
 }
