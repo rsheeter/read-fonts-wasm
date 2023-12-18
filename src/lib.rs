@@ -1,9 +1,8 @@
 use js_sys::{ArrayBuffer, Uint8Array};
 
 use skrifa::{
-    raw::{FontRef, TableProvider},
-    scale::{Context, Pen},
-    prelude::Size,
+    instance::LocationRef, outline::DrawSettings, prelude::Size, raw::FontRef, scale::Pen,
+    MetadataProvider,
 };
 use wasm_bindgen::prelude::*;
 use woff2::decode::{convert_woff2_to_ttf, is_woff2};
@@ -117,20 +116,19 @@ pub fn svg_of_glyph_for_codepoint(cp: u32, buf: &ArrayBuffer) -> String {
         Err(e) => return format!("FontRef::new failed: {e}"),
     };
 
-    let mut cx = Context::new();
-    let mut scalar = cx.new_scaler().size(Size::new(18.0)).build(&font);
     let mut pen = SvgPen::default();
 
-    let cmap = match font.cmap() {
-        Ok(cmap) => cmap,
-        Err(e) => return format!("No cmap available: {e}"),
-    };
-    let gid = match cmap.map_codepoint(cp) {
+    let gid = match font.charmap().map(cp) {
         Some(gid) => gid,
         None => return format!("No glyph id for codepoint"),
     };
+    let glyph = match font.outline_glyphs().get(gid) {
+        Some(glyph) => glyph,
+        None => return format!("No outline for glyph"),
+    };
 
-    match scalar.outline(gid, &mut pen) {
+    let settings = DrawSettings::unhinted(Size::new(18.0), LocationRef::default());
+    match glyph.draw(settings, &mut pen) {
         Ok(..) => pen.to_string(),
         Err(e) => format!("outline failed: {e}"),
     }
