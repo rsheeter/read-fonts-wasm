@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>read-fonts-wasm example</title>
+    <style>
+      body {
+        font-family: 'Google Sans', system-ui, sans-serif;
+      }
+      .container {
+        display: none;
+      }
+      body.font-loaded .container {
+        display: flex;
+      }
+      main {
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      main:after {
+        content: "Loading...";
+      }
+      body.font-loaded main:after {
+        content: "";
+      }
+      label {
+        display: block;
+        margin: 0 0 1rem;
+      }
+      .svg {
+        box-sizing: border-box;
+        padding: 25px;
+        width: 300px;
+      }
+      svg {
+        width: 100%;
+      }
+      lottie-player {
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script type="module">
+        import init, { svg_of_glyph_for_codepoint, lottie_for_codepoint } from './pkg/read_fonts_wasm.js';
+
+        // Init Wasm
+        await init();
+
+        const FONT_URL = 'https://fonts.gstatic.com/s/googlesymbols/v242/Hhy3U5Ak9u-oMExPeInvcuEmPosC9wrTHcgHU68c_vndKM1nfqDwl2mzc_IjQPpXt1KUbg8.ttf';
+
+        const fontBuffer = await (await fetch(FONT_URL)).arrayBuffer();
+
+        document.body.classList.add('font-loaded');
+
+        const input = document.querySelector('input');
+        const select = document.querySelector('select');
+
+        input.addEventListener('input', () => {
+          render();
+        });
+
+        select.addEventListener('input', () => {
+          render();
+        });
+
+        render();
+  
+        function render() {
+            const codepoint = '0x' + input.value;
+            const animation = select.value;
+            const svg = svg_of_glyph_for_codepoint(codepoint, fontBuffer);
+            if (svg.startsWith('<svg')) {
+              document.querySelector('.svg').innerHTML = svg;
+
+              const lottie = lottie_for_codepoint(codepoint, animation, fontBuffer);
+              document.querySelector("lottie-player").load(lottie);
+            }
+        }
+
+      </script>
+      <main>
+        <section>
+          <h2>Rusticons</h2>
+          <p>Using <a href="http://go/icons">Google Symbols</a></p>
+          <label>
+            Codepoint:
+            <input type="text" value="e8b8" />
+          </label>
+          <label>
+            Animation:
+            <select>
+              <option>still</option>
+              <option>twirl-whole</option>
+              <option>twirl-parts</option>
+              <option>pulse-whole</option>
+              <option selected>pulse-parts</option>
+            </select>
+          </label>
+          <div class="container">
+            <div class="svg"></div>
+            <lottie-player autoplay loop controls mode="normal" src=""></lottie-player>
+          </div>
+        </section>
+      </main>
+    </body>
+  </html>
+  
